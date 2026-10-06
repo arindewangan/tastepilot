@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TastePilot — an agentic cultural concierge powered by Qloo</title>
+<link rel="icon" href="assets/logo.webp" type="image/webp">
+<style>
+  :root{
+    --ink:#f4f1ea; --ink-dim:#b9b3a6; --bg:#0e0c1a; --bg2:#17132b;
+    --card:#1d1832; --card2:#241d3d; --amber:#f2b544; --amber2:#ffcf7a;
+    --indigo:#6c63ff; --teal:#3fd6b2; --line:#342c55; --danger:#ff7a7a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1200px 600px at 80% -10%,#2b2152 0%,var(--bg) 55%) fixed,var(--bg);
+    color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.55}
+  a{color:var(--amber2)}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+  header.top{display:flex;align-items:center;gap:12px;padding:16px 0}
+  header.top img.logo{width:44px;height:44px;border-radius:12px}
+  header.top .brand{font-weight:800;font-size:1.35rem;letter-spacing:.5px}
+  header.top .brand small{display:block;font-weight:400;font-size:.75rem;color:var(--ink-dim)}
+  .demo-banner{background:#2a1408;border:1px solid #7a4a16;color:#ffd9a0;border-radius:12px;
+    padding:10px 16px;margin:8px 0 0;font-size:.9rem;display:none}
+  .demo-banner.show{display:block}
+  .hero{border-radius:20px;overflow:hidden;position:relative;margin:18px 0 26px;
+    border:1px solid var(--line);min-height:300px;display:flex;align-items:flex-end;
+    background:url('assets/banner.png') center/cover no-repeat, var(--bg2)}
+  .hero .scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,12,26,.1) 0%,rgba(14,12,26,.88) 100%)}
+  .hero .copy{position:relative;padding:28px}
+  .hero h1{margin:0 0 8px;font-size:clamp(1.8rem,4.5vw,3rem);line-height:1.1}
+  .hero h1 .accent{color:var(--amber2)}
+  .hero p{margin:0 0 14px;max-width:640px;color:#e9e4d8}
+  .btn{background:linear-gradient(135deg,var(--amber),#e08a1e);color:#221503;border:0;border-radius:12px;
+    padding:12px 20px;font-weight:700;font-size:1rem;cursor:pointer;transition:transform .12s}
+  .btn:hover{transform:translateY(-1px)}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+  .btn:disabled{opacity:.55;cursor:wait}
+  .grid{display:grid;gap:18px}
+  @media(min-width:880px){.grid.cols2{grid-template-columns:1fr 1fr}}
+  .card{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);
+    border-radius:16px;padding:20px}
+  .card h2{margin:0 0 6px;font-size:1.25rem}
+  .card p.sub{margin:0 0 14px;color:var(--ink-dim);font-size:.92rem}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+  .chip{background:#2e2452;border:1px solid var(--indigo);border-radius:999px;padding:6px 12px;
+    font-size:.88rem;display:inline-flex;align-items:center;gap:8px}
+  .chip button{background:none;border:0;color:var(--ink-dim);cursor:pointer;font-size:1rem;line-height:1}
+  .row{display:flex;gap:10px}
+  input[type=text]{flex:1;background:#100d20;border:1px solid var(--line);border-radius:12px;
+    color:var(--ink);padding:12px 14px;font-size:1rem;min-width:0}
+  input[type=text]:focus{outline:2px solid var(--indigo)}
+  .entity-card{display:flex;gap:12px;align-items:center;background:#141024;border:1px solid var(--line);
+    border-radius:12px;padding:10px 14px;margin:8px 0;font-size:.92rem}
+  .entity-card .tick{color:var(--teal);font-weight:800}
+  .entity-card .type{color:var(--ink-dim);font-size:.78rem}
+  #radar{width:100%;max-width:340px;height:auto;display:block;margin:0 auto}
+  .dna-summary{font-style:italic;color:#e6dfcf}
+  .trace{background:#0f0c1e;border:1px dashed var(--line);border-radius:12px;padding:12px 16px;
+    margin:12px 0;font-size:.88rem;color:var(--ink-dim);display:none}
+  .trace.show{display:block}
+  .trace .st{display:flex;gap:10px;padding:4px 0}
+  .trace .dot{color:var(--teal)}
+  .spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--line);
+    border-top-color:var(--amber);border-radius:50%;animation:spin 0.8s linear infinite;vertical-align:-3px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .itinerary{display:grid;gap:14px;margin-top:14px}
+  @media(min-width:720px){.itinerary{grid-template-columns:1fr 1fr}}
+  .pick{background:#141024;border:1px solid var(--line);border-radius:14px;padding:16px;position:relative}
+  .pick .kind{font-size:.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--ink-dim)}
+  .pick h3{margin:4px 0 6px;font-size:1.08rem}
+  .aff{display:flex;align-items:center;gap:10px;margin:8px 0}
+  .aff .bar{flex:1;height:10px;background:#0a0817;border-radius:6px;overflow:hidden}
+  .aff .fill{height:100%;background:linear-gradient(90deg,var(--indigo),var(--teal));border-radius:6px;
+    transition:width .8s ease}
+  .aff .pct{font-weight:800;color:var(--amber2);min-width:48px;text-align:right}
+  .why{font-size:.9rem;color:#d8d2c2;border-left:3px solid var(--amber);padding-left:10px;margin:8px 0}
+  .tags{font-size:.78rem;color:var(--ink-dim)}
+  .sim{position:absolute;top:10px;right:10px;font-size:.68rem;background:#3a2a08;color:#ffd9a0;
+    border:1px solid #7a4a16;border-radius:6px;padding:2px 8px}
+  .compare-cols{display:grid;gap:14px;margin-top:12px}
+  @media(min-width:720px){.compare-cols{grid-template-columns:1fr 1fr}}
+  .gen{opacity:.92}
+  .gen h3{font-size:1rem}
+  .foot{margin:34px 0 40px;color:var(--ink-dim);font-size:.85rem;text-align:center}
+  .err{background:#3a1218;border:1px solid #7a2a2a;color:#ffc9c9;border-radius:12px;padding:12px 16px;
+    margin:12px 0;display:none}
+  .err.show{display:block}
+  .toggle-row{display:flex;align-items:center;gap:10px;margin:14px 0}
+  .switch{position:relative;width:52px;height:28px;background:#2a2347;border-radius:999px;cursor:pointer;
+    border:1px solid var(--line);flex:none}
+  .switch::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;
+    background:var(--ink-dim);transition:all .18s}
+  .switch.on{background:linear-gradient(135deg,var(--amber),#e08a1e)}
+  .switch.on::after{left:27px;background:#221503}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <img class="logo" src="assets/logo.webp" alt="TastePilot logo" onerror="this.style.display='none'">
+    <div class="brand">TastePilot<small>an agentic cultural concierge · powered by Qloo</small></div>
+  </header>
+
+  <div id="demoBanner" class="demo-banner">⚠️ <b>Demo Mode</b> — no <code>QLOO_API_KEY</code> configured, so all taste data below is <b>simulated</b>. The full live path activates automatically once a key is set.</div>
+
+  <section class="hero">
+    <div class="scrim"></div>
+    <div class="copy">
+      <h1>Your taste, <span class="accent">planned.</span></h1>
+      <p>Tell TastePilot what you love — it resolves your favorites against Qloo's 250M-entity taste graph and plans real-world experiences where every pick shows its <b>affinity score</b> and why it fits your taste.</p>
+      <button class="btn" id="ctaTest">Try the 60-second taste test ↓</button>
+    </div>
+  </section>
+
+  <div class="err" id="errBox"></div>
+
+  <div class="grid cols2">
+    <!-- Step 1: favorites -->
+    <section class="card" id="step1">
+      <h2>1 · Tell it what you love</h2>
+      <p class="sub">Add 3–6 favorites across domains — music, film, books, food. Each resolves to a Qloo entity.</p>
+      <div class="row">
+        <input type="text" id="favInput" placeholder="e.g. Wes Anderson, jazz, Murakami, ramen">
+        <button class="btn ghost" id="addFav">Add</button>
+      </div>
+      <div class="chips" id="favChips"></div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn ghost" id="demoFavs">Use demo favorites</button>
+        <button class="btn" id="buildDna">Build my Taste DNA →</button>
+      </div>
+      <div id="entityCards"></div>
+    </section>
+
+    <!-- Step 2: Taste DNA -->
+    <section class="card" id="step2">
+      <h2>2 · Your Taste DNA</h2>
+      <p class="sub">A cross-domain fingerprint from your seeds, weighted by Qloo's taste graph.</p>
+      <div id="dnaEmpty" style="color:var(--ink-dim)">Build your profile to see your taste fingerprint.</div>
+      <div id="dnaBody" style="display:none">
+        <canvas id="radar" width="340" height="300"></canvas>
+        <p class="dna-summary" id="dnaSummary"></p>
+        <div class="chips" id="dnaTags"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Step 3: plan -->
+  <section class="card" style="margin-top:18px">
+    <h2>3 · Ask for a plan</h2>
+    <p class="sub">The agent classifies your intent, fires cross-domain Qloo <code>/v2/insights</code> queries (your film + music taste → places), then narrates every pick.</p>
+    <div class="row">
+      <input type="text" id="planInput" placeholder="Plan my Saturday in Mumbai" value="Plan my Saturday in Mumbai">
+      <button class="btn" id="planBtn">Plan it ✈</button>
+    </div>
+    <div class="toggle-row">
+      <div class="switch" id="whyToggle" role="switch" aria-checked="false" tabindex="0"></div>
+      <label for="whyToggle"><b>Why Qloo?</b> — compare the Qloo-grounded plan against a generic LLM list, side by side.</label>
+    </div>
+    <div class="trace" id="trace"></div>
+    <div class="itinerary" id="itinerary"></div>
+    <div id="compareWrap" style="display:none">
+      <h3 style="margin:18px 0 4px">Why Qloo? — side by side</h3>
+      <p class="sub">Left: taste-grounded (Qloo affinity). Right: generic LLM with no taste data.</p>
+      <div class="compare-cols">
+        <div><h4>🎯 Qloo-grounded</h4><div class="itinerary" id="cmpQloo" style="grid-template-columns:1fr"></div></div>
+        <div><h4>🤖 Generic LLM</h4><div class="itinerary" id="cmpGen" style="grid-template-columns:1fr"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <p class="foot">
+    TastePilot · built for the Qloo Agentic Hackathon ·
+    <a href="https://qloo.devpost.com/" target="_blank" rel="noopener">qloo.devpost.com</a> ·
+    MIT licensed · all Qloo calls are server-side (keys never touch the browser)
+  </p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const $ = id => document.getElementById(id);
+  const errBox = $("errBox");
+  let favorites = [];
+  let demoMode = true;
+
+  function showError(msg){
+    errBox.textContent = msg; errBox.classList.add("show");
+    setTimeout(()=>errBox.classList.remove("show"), 6000);
+  }
+  async function api(path, body){
+    const opts = {headers:{"Content-Type":"application/json"}};
+    if (body){ opts.method="POST"; opts.body=JSON.stringify(body); }
+    const r = await fetch(path, opts);
+    const data = await r.json().catch(()=>({}));
+    if (!r.ok) throw new Error(data.error || ("Request failed: "+r.status));
+    return data;
+  }
+
+  // --- health / demo banner
+  api("/api/health").then(h=>{
+    demoMode = !!h.demo_mode;
+    if (demoMode) $("demoBanner").classList.add("show");
+  }).catch(()=>{ $("demoBanner").classList.add("show"); });
+
+  // --- favorites chips
+  function renderChips(){
+    const box = $("favChips"); box.innerHTML="";
+    favorites.forEach((f,i)=>{
+      const s=document.createElement("span"); s.className="chip";
+      s.innerHTML = ""; s.append(document.createTextNode(f));
+      const x=document.createElement("button"); x.textContent="×"; x.title="remove";
+      x.onclick=()=>{favorites.splice(i,1);renderChips();};
+      s.appendChild(x); box.appendChild(s);
+    });
+  }
+  function addFav(v){
+    v=(v||"").trim(); if(!v) return;
+    if(favorites.length>=12){showError("Up to 12 favorites — keep it focused.");return;}
+    favorites.push(v); $("favInput").value=""; renderChips();
+  }
+  $("addFav").onclick=()=>addFav($("favInput").value);
+  $("favInput").addEventListener("keydown",e=>{if(e.key==="Enter")addFav(e.target.value);});
+  $("demoFavs").onclick=()=>{favorites=["Wes Anderson","jazz","Murakami","ramen"];renderChips();};
+  $("ctaTest").onclick=()=>{ $("step1").scrollIntoView({behavior:"smooth"});
+    if(!favorites.length) $("demoFavs").click(); };
+
+  // --- Taste DNA radar
+  function drawRadar(weights){
+    const c=$("radar"), ctx=c.getContext("2d");
+    const axes=[["Music",["improvisation","vinyl","soulful","late night","sitar","fusion"]],
+                ["Film",["quirky","indie film","symmetrical","retro","arthouse","humanist","surreal"]],
+                ["Food",["comfort food","japanese cuisine","noodles","irani café","heritage"]],
+                ["Places",["walkable","art galleries","cultural hub","quiet"]],
+                ["Vibe",["introspective","dreamlike","bookish","slow mornings","conversation"]]];
+    const cx=170, cy=150, R=110, n=axes.length;
+    ctx.clearRect(0,0,c.width,c.height);
+    ctx.strokeStyle="#342c55"; ctx.fillStyle="#b9b3a6"; ctx.font="12px sans-serif";
+    for(let ring=1;ring<=4;ring++){
+      ctx.beginPath();
+      for(let i=0;i<=n;i++){
+        const a=-Math.PI/2 + (i%n)*(2*Math.PI/n), r=R*ring/4;
+        const x=cx+r*Math.cos(a), y=cy+r*Math.sin(a);
+        i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+      }
+      ctx.stroke();
+    }
+    const vals=axes.map(([label,keys])=>Math.min(1,keys.reduce((s,k)=>s+(weights[k]||0),0)/3));
+    ctx.beginPath();
+    vals.forEach((v,i)=>{
+      const a=-Math.PI/2+i*(2*Math.PI/n), r=8+v*(R-8);
+      const x=cx+r*Math.cos(a), y=cy+r*Math.sin(a);
+      i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+      ctx.fillText(axes[i][0], cx+(R+16)*Math.cos(a)-18, cy+(R+16)*Math.sin(a)+4);
+    });
+    ctx.closePath();
+    ctx.fillStyle="rgba(108,99,255,.28)"; ctx.fill();
+    ctx.strokeStyle="#f2b544"; ctx.lineWidth=2; ctx.stroke();
+    ctx.fillStyle="#ffcf7a";
+    vals.forEach((v,i)=>{
+      const a=-Math.PI/2+i*(2*Math.PI/n), r=8+v*(R-8);
+      ctx.beginPath(); ctx.arc(cx+r*Math.cos(a), cy+r*Math.sin(a), 4, 0, 7); ctx.fill();
+    });
+  }
+
+  $("buildDna").onclick=async()=>{
+    if(!favorites.length){showError("Add a few favorites first.");return;}
+    const btn=$("buildDna"); btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Resolving…';
+    try{
+      const res=await api("/api/taste-profile",{favorites});
+      const p=res.profile;
+      $("dnaEmpty").style.display="none"; $("dnaBody").style.display="block";
+      drawRadar(p.tag_weights||{});
+      $("dnaSummary").textContent=p.summary;
+      const tg=$("dnaTags"); tg.innerHTML="";
+      (p.tags||[]).slice(0,10).forEach(t=>{
+        const s=document.createElement("span"); s.className="chip"; s.textContent=t; tg.appendChild(s);
+      });
+      const ec=$("entityCards"); ec.innerHTML="";
+      (p.entities||[]).forEach(e=>{
+        const d=document.createElement("div"); d.className="entity-card";
+        d.innerHTML='<span class="tick">✓</span><span><b></b> <span class="type"></span>'+(e.demo?' <span class="sim" style="position:static">simulated</span>':"")+"</span>";
+        d.querySelector("b").textContent=e.name;
+        d.querySelector(".type").textContent="· "+(e.filter_type||"Qloo entity");
+        ec.appendChild(d);
+      });
+      renderTrace(res.trace);
+    }catch(e){showError(e.message);}
+    finally{btn.disabled=false;btn.textContent="Build my Taste DNA →";}
+  };
+
+  function renderTrace(trace){
+    const t=$("trace"); t.innerHTML=""; t.classList.add("show");
+    (trace||[]).forEach(s=>{
+      const d=document.createElement("div"); d.className="st";
+      d.innerHTML='<span class="dot">●</span><span></span>';
+      d.lastChild.textContent="["+s.step+"] "+s.detail;
+      t.appendChild(d);
+    });
+  }
+
+  function pickCard(item){
+    const d=document.createElement("div"); d.className="pick";
+    const pct=item.affinity!=null?Math.round(item.affinity*100):null;
+    d.innerHTML=(item.demo?'<span class="sim">simulated</span>':"")+
+      '<div class="kind">'+(item.kind==="movie"?"🎬 film pick":"📍 place pick")+"</div><h3></h3>"+
+      (pct!=null?'<div class="aff"><div class="bar"><div class="fill" style="width:0%"></div></div><div class="pct">'+pct+'%</div></div>':"")+
+      '<div class="why"></div><div class="tags"></div>';
+    d.querySelector("h3").textContent=item.name;
+    d.querySelector(".why").textContent=item.why||"";
+    d.querySelector(".tags").textContent=(item.tags||[]).join(" · ");
+    const fill=d.querySelector(".fill");
+    if(fill) requestAnimationFrame(()=>requestAnimationFrame(()=>{fill.style.width=pct+"%";}));
+    return d;
+  }
+  function genCard(item){
+    const d=document.createElement("div"); d.className="pick gen";
+    d.innerHTML=(item.demo?'<span class="sim">simulated</span>':"")+"<h3></h3><div class='why'></div>";
+    d.querySelector("h3").textContent=item.name;
+    d.querySelector(".why").textContent=item.why||"";
+    return d;
+  }
+
+  $("planBtn").onclick=async()=>{
+    if(!favorites.length){showError("Add favorites (or use demo favorites) first.");return;}
+    const req=$("planInput").value.trim();
+    if(!req){showError("Tell the agent what to plan.");return;}
+    const btn=$("planBtn"); btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Agent working…';
+    const box=$("itinerary"); box.innerHTML="";
+    try{
+      const res=await api("/api/plan",{request:req,favorites});
+      renderTrace(res.trace);
+      (res.items||[]).forEach(it=>box.appendChild(pickCard(it)));
+      if(!res.items.length) showError("No picks came back — try different favorites.");
+    }catch(e){showError(e.message);}
+    finally{btn.disabled=false;btn.textContent="Plan it ✈";}
+  };
+
+  // --- Why Qloo? toggle
+  const tog=$("whyToggle");
+  function setToggle(on){ tog.classList.toggle("on",on); tog.setAttribute("aria-checked",on); }
+  async function runCompare(){
+    setToggle(true);
+    if(!favorites.length){showError("Add favorites first.");setToggle(false);return;}
+    const req=$("planInput").value.trim()||"Plan my Saturday in Mumbai";
+    $("compareWrap").style.display="block";
+    const q=$("cmpQloo"), g=$("cmpGen"); q.innerHTML=g.innerHTML="";
+    const spin=document.createElement("div"); spin.innerHTML='<span class="spinner"></span> Comparing…';
+    q.appendChild(spin);
+    try{
+      const res=await api("/api/compare",{request:req,favorites});
+      q.innerHTML="";
+      (res.qloo||[]).forEach(it=>q.appendChild(pickCard(it)));
+      (res.generic||[]).forEach(it=>g.appendChild(genCard(it)));
+      renderTrace(res.trace);
+    }catch(e){q.innerHTML="";showError(e.message);setToggle(false);}
+  }
+  tog.onclick=()=>{ tog.classList.contains("on") ? (setToggle(false),$("compareWrap").style.display="none") : runCompare(); };
+  tog.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();tog.click();}});
+})();
+</script>
+</body>
+</html>
