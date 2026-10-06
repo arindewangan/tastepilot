@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TastePilot — simulated product demo</title>
+<style>
+  :root{--ink:#f4f1ea;--dim:#b9b3a6;--bg:#0e0c1a;--card:#1d1832;--line:#342c55;
+    --amber:#f2b544;--amber2:#ffcf7a;--indigo:#6c63ff;--teal:#3fd6b2}
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1000px 500px at 80% -10%,#2b2152 0%,var(--bg) 55%) fixed,var(--bg);
+    color:var(--ink);font-family:ui-sans-serif,system-ui,sans-serif;line-height:1.55}
+  .wrap{max-width:960px;margin:0 auto;padding:0 20px}
+  header{padding:22px 0;display:flex;align-items:center;gap:12px}
+  .mark{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--indigo),var(--amber));
+    display:flex;align-items:center;justify-content:center;font-size:1.4rem}
+  .brand{font-weight:800;font-size:1.3rem}
+  .brand small{display:block;font-weight:400;font-size:.75rem;color:var(--dim)}
+  .sim-banner{background:#2a1408;border:1px solid #7a4a16;color:#ffd9a0;border-radius:12px;
+    padding:12px 16px;margin:6px 0 18px;font-size:.92rem}
+  .hero{text-align:center;padding:34px 0 10px}
+  .hero h1{font-size:clamp(2rem,5vw,3.2rem);margin:0 0 10px}
+  .hero h1 .a{color:var(--amber2)}
+  .hero p{color:#e9e4d8;max-width:640px;margin:0 auto 18px}
+  .btn{background:linear-gradient(135deg,var(--amber),#e08a1e);color:#221503;border:0;border-radius:12px;
+    padding:12px 22px;font-weight:700;font-size:1rem;cursor:pointer}
+  .step{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin:16px 0}
+  .step h2{margin:0 0 4px;font-size:1.2rem}
+  .step .sub{color:var(--dim);font-size:.9rem;margin:0 0 12px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+  .chip{background:#2e2452;border:1px solid var(--indigo);border-radius:999px;padding:6px 14px;font-size:.88rem}
+  .radar-wrap{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+  #radar{flex:none}
+  .legend{font-size:.9rem;color:#d8d2c2}
+  .legend li{margin:6px 0;list-style:none}
+  .legend ul{padding:0;margin:0}
+  .trace{background:#0f0c1e;border:1px dashed var(--line);border-radius:12px;padding:12px 16px;
+    font-size:.86rem;color:var(--dim);margin:12px 0}
+  .trace div{padding:3px 0}
+  .grid{display:grid;gap:14px}
+  @media(min-width:700px){.grid{grid-template-columns:1fr 1fr}}
+  .pick{background:#141024;border:1px solid var(--line);border-radius:14px;padding:16px;position:relative}
+  .pick h3{margin:4px 0 6px}
+  .aff{display:flex;align-items:center;gap:10px;margin:8px 0}
+  .aff .bar{flex:1;height:10px;background:#0a0817;border-radius:6px;overflow:hidden}
+  .aff .fill{height:100%;background:linear-gradient(90deg,var(--indigo),var(--teal))}
+  .aff .pct{font-weight:800;color:var(--amber2);min-width:48px;text-align:right}
+  .why{font-size:.9rem;color:#d8d2c2;border-left:3px solid var(--amber);padding-left:10px;margin:8px 0}
+  .tags{font-size:.78rem;color:var(--dim)}
+  .sim{position:absolute;top:10px;right:10px;font-size:.68rem;background:#3a2a08;color:#ffd9a0;
+    border:1px solid #7a4a16;border-radius:6px;padding:2px 8px}
+  .cmp{display:grid;gap:14px}
+  @media(min-width:700px){.cmp{grid-template-columns:1fr 1fr}}
+  .foot{margin:30px 0 40px;color:var(--dim);font-size:.85rem;text-align:center}
+  .foot a{color:var(--amber2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="mark">🧭</div>
+    <div class="brand">TastePilot<small>an agentic cultural concierge · powered by Qloo</small></div>
+  </header>
+
+  <div class="sim-banner">⚠️ <b>Simulated product demo</b> — every recommendation, score and explanation on this page is <b>mock data</b> illustrating the full TastePilot user loop. The live app grounds the same loop in Qloo's taste API.</div>
+
+  <section class="hero">
+    <h1>Your taste, <span class="a">planned.</span></h1>
+    <p>A 60-second simulated walkthrough: favorites → Taste DNA → a Saturday plan in Mumbai → the "Why Qloo?" proof. No setup, no keys, no signup.</p>
+    <button class="btn" onclick="document.getElementById('s1').scrollIntoView({behavior:'smooth'})">Start the tour ↓</button>
+  </section>
+
+  <section class="step" id="s1">
+    <h2>1 · Tell it what you love</h2>
+    <p class="sub">In the live app you type or pick favorites; each is resolved to a Qloo entity ID via <code>/search</code>. Simulated here:</p>
+    <div class="chips" id="favChips"></div>
+    <div class="trace" id="searchTrace"></div>
+  </section>
+
+  <section class="step" id="s2">
+    <h2>2 · Your Taste DNA</h2>
+    <p class="sub">Affinity-weighted tags from your seeds across music, film, food, places and vibe — rendered as your taste fingerprint.</p>
+    <div class="radar-wrap">
+      <canvas id="radar" width="300" height="260"></canvas>
+      <div class="legend">
+        <p style="font-style:italic;color:#e6dfcf;margin-top:0">"Your taste fingerprint blends indie-film quirk, late-night jazz warmth and introspective literary depth — the graph reads that as a pull toward heritage spaces, slow cafés and arthouse culture."</p>
+        <ul id="tagList"></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="step" id="s3">
+    <h2>3 · "Plan my Saturday in Mumbai"</h2>
+    <p class="sub">The agent classifies intent → fires the cross-domain jump (<code>/v2/insights</code>: film + music taste → places, ranked by affinity) → narrates every pick.</p>
+    <div class="trace" id="planTrace"></div>
+    <div class="grid" id="itinerary"></div>
+  </section>
+
+  <section class="step" id="s4">
+    <h2>4 · Why Qloo? — the side-by-side proof</h2>
+    <p class="sub">Left: taste-grounded picks with affinity scores. Right: what a generic LLM suggests with zero taste data. Same request, different brain.</p>
+    <div class="cmp">
+      <div><h3 style="margin-top:0">🎯 Qloo-grounded</h3><div class="grid" id="cmpQloo" style="grid-template-columns:1fr"></div></div>
+      <div><h3 style="margin-top:0">🤖 Generic LLM</h3><div class="grid" id="cmpGen" style="grid-template-columns:1fr"></div></div>
+    </div>
+  </section>
+
+  <p class="foot">
+    TastePilot · built for the <a href="https://qloo.devpost.com/" target="_blank" rel="noopener">Qloo Agentic Hackathon</a> ·
+    MIT licensed · this page is a <b>simulated</b> showcase; the live app runs the same loop against <code>https://hackathon.api.qloo.com</code>
+  </p>
+</div>
+
+<script>
+(function(){
+"use strict";
+// ---------- SIMULATED DATA (mirrors demo_data.py; every surface labeled simulated)
+const FAVS = ["Wes Anderson","jazz","Murakami","ramen"];
+const ENTITIES = [
+  {name:"Wes Anderson", type:"Qloo entity · person", tags:["quirky","indie film","symmetrical","retro"]},
+  {name:"Jazz", type:"Qloo entity · artist", tags:["improvisation","late night","vinyl","soulful"]},
+  {name:"Haruki Murakami", type:"Qloo entity · book", tags:["surreal","introspective","dreamlike"]},
+  {name:"Ramen", type:"Qloo entity · place", tags:["japanese cuisine","comfort food","noodles"]}
+];
+const PLACES = [
+  {name:"Britannia & Co.", area:"Fort", affinity:0.91, tags:["heritage","irani café","comfort food"],
+   why:"Taste-graph match: fans of Wes Anderson over-index on heritage, which is why “Britannia & Co.” scores 91% affinity for you."},
+  {name:"Kala Ghoda Arts Precinct", area:"Kala Ghoda", affinity:0.87, tags:["art galleries","indie","walkable"],
+   why:"This pick is taste-grounded, not guessed: your jazz signal transfers across domains to indie culture — “Kala Ghoda Arts Precinct” at 87%."},
+  {name:"Blue Tokai — Kala Ghoda", area:"Kala Ghoda", affinity:0.84, tags:["specialty coffee","slow mornings","bookish"],
+   why:"Qloo’s cross-domain graph connects your Murakami taste to bookish slow-morning culture; “Blue Tokai” lands at 84% affinity."},
+  {name:"Prithvi Theatre", area:"Juhu", affinity:0.83, tags:["live theatre","indie","cultural hub"],
+   why:"Taste-graph match: fans of Wes Anderson over-index on indie, which is why “Prithvi Theatre” scores 83% affinity for you."},
+  {name:"Taj Mahal Tea House", area:"Bandra", affinity:0.79, tags:["heritage","quiet","conversation"],
+   why:"Your introspective literary signal transfers to quiet conversation spaces — “Taj Mahal Tea House” at 79%."},
+  {name:"The Daily — All Day Café", area:"Bandra", affinity:0.76, tags:["brunch","design-forward","casual"],
+   why:"Design-forward casual dining reads strongly against your symmetrical indie-film taste — 76% affinity."}
+];
+const MOVIES = [
+  {name:"The Lunchbox", affinity:0.88, tags:["mumbai","introspective","arthouse"],
+   why:"A Mumbai arthouse story that mirrors your introspective taste — 88% affinity."},
+  {name:"The Grand Budapest Hotel", affinity:0.86, tags:["quirky","symmetrical","indie film"],
+   why:"Peak Wes Anderson symmetry and quirk — 86% affinity, straight from your top seed."}
+];
+const GENERIC = [
+  {name:"Gateway of India", why:"A popular tourist landmark."},
+  {name:"Juhu Beach", why:"A well-known beach."},
+  {name:"Phoenix Mall food court", why:"Lots of dining options."},
+  {name:"Marine Drive", why:"A famous promenade."}
+];
+const TRACE_SEARCH = ["[search] “Wes Anderson” → Wes Anderson (person)",
+  "[search] “jazz” → Jazz (artist)",
+  "[search] “Murakami” → Haruki Murakami (book)",
+  "[search] “ramen” → Ramen (place)"];
+const TRACE_PLAN = ["[classify] Intent: plan · Mumbai · moods: —",
+  "[insights] Cross-domain jump: 4 taste seeds → 6 Mumbai places, ranked by affinity",
+  "[insights] Second leg: 2 films matching the same taste",
+  "[synthesize] Itinerary narrated with per-pick taste explanations"];
+
+// ---------- render
+const sim = '<span class="sim">simulated</span>';
+const chips = document.getElementById("favChips");
+FAVS.forEach(f=>{const s=document.createElement("span");s.className="chip";s.textContent=f;chips.appendChild(s);});
+const st = document.getElementById("searchTrace");
+TRACE_SEARCH.forEach(t=>{const d=document.createElement("div");d.textContent=t;st.appendChild(d);});
+
+const weights = {};
+ENTITIES.forEach(e=>e.tags.forEach(t=>weights[t]=(weights[t]||0)+1));
+const tl = document.getElementById("tagList");
+Object.entries(weights).sort((a,b)=>b[1]-a[1]).slice(0,8).forEach(([t,w])=>{
+  const li=document.createElement("li");li.textContent="● "+t+" ×"+w;tl.appendChild(li);
+});
+
+// radar
+(function(){
+  const c=document.getElementById("radar"), x=c.getContext("2d");
+  const axes=[["Music",["improvisation","vinyl","soulful","late night"]],
+              ["Film",["quirky","indie film","symmetrical","retro","surreal"]],
+              ["Food",["comfort food","japanese cuisine","noodles"]],
+              ["Places",["irani café","heritage","quiet"]],
+              ["Vibe",["introspective","dreamlike","bookish","slow mornings"]]];
+  const cx=150, cy=130, R=95, n=axes.length;
+  x.strokeStyle="#342c55"; x.fillStyle="#b9b3a6"; x.font="11px sans-serif";
+  for(let ring=1;ring<=4;ring++){x.beginPath();
+    for(let i=0;i<=n;i++){const a=-Math.PI/2+(i%n)*(2*Math.PI/n),r=R*ring/4;
+      const px=cx+r*Math.cos(a),py=cy+r*Math.sin(a);i?x.lineTo(px,py):x.moveTo(px,py);}
+    x.stroke();}
+  const vals=axes.map(a=>Math.min(1,a[1].reduce((s,k)=>s+(weights[k]||0),0)/2.5));
+  x.beginPath();
+  vals.forEach((v,i)=>{const a=-Math.PI/2+i*(2*Math.PI/n),r=8+v*(R-8);
+    const px=cx+r*Math.cos(a),py=cy+r*Math.sin(a);
+    i?x.lineTo(px,py):x.moveTo(px,py);
+    x.fillText(axes[i][0],cx+(R+14)*Math.cos(a)-16,cy+(R+14)*Math.sin(a)+4);});
+  x.closePath();x.fillStyle="rgba(108,99,255,.28)";x.fill();
+  x.strokeStyle="#f2b544";x.lineWidth=2;x.stroke();
+})();
+
+function card(p, kind){
+  const d=document.createElement("div");d.className="pick";
+  const pct=Math.round(p.affinity*100);
+  d.innerHTML=sim+'<div style="font-size:.72rem;text-transform:uppercase;letter-spacing:1px;color:#b9b3a6">'+kind+"</div><h3></h3>"+
+    '<div class="aff"><div class="bar"><div class="fill" style="width:'+pct+'%"></div></div><div class="pct">'+pct+'%</div></div>'+
+    '<div class="why"></div><div class="tags"></div>';
+  d.querySelector("h3").textContent=p.name;
+  d.querySelector(".why").textContent=p.why;
+  d.querySelector(".tags").textContent=(p.tags||[]).join(" · ");
+  return d;
+}
+const pt=document.getElementById("planTrace");
+TRACE_PLAN.forEach(t=>{const d=document.createElement("div");d.textContent=t;pt.appendChild(d);});
+const itin=document.getElementById("itinerary");
+PLACES.forEach(p=>itin.appendChild(card(p,"📍 place pick")));
+MOVIES.forEach(m=>itin.appendChild(card(m,"🎬 film pick")));
+const cq=document.getElementById("cmpQloo");
+PLACES.slice(0,3).forEach(p=>cq.appendChild(card(p,"📍 place pick")));
+const cg=document.getElementById("cmpGen");
+GENERIC.forEach(g=>{const d=document.createElement("div");d.className="pick";
+  d.innerHTML=sim+"<h3></h3><div class='why'></div>";
+  d.querySelector("h3").textContent=g.name;
+  d.querySelector(".why").textContent=g.why;
+  cg.appendChild(d);});
+})();
+</script>
+</body>
+</html>
